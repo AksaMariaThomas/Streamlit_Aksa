@@ -1,17 +1,14 @@
 import streamlit as st
 import pandas as pd
 
-# Initialize session state to hold entries
 if "entries" not in st.session_state:
     st.session_state.entries = []
 
-# Determine health status
 def get_status(minutes):
     return "Healthy" if int(minutes) >= 60 else "Needs More Me-Time"
 
-st.title("🧠 Mental Wellness Logger (No Excel)")
+st.title("🧠 Mental Wellness Logger")
 
-# --- Input Form ---
 with st.form("entry_form", clear_on_submit=True):
     name = st.text_input("Student Name")
     gender = st.radio("Gender", ["Male", "Female", "Other"], horizontal=True)
@@ -39,7 +36,6 @@ with st.form("entry_form", clear_on_submit=True):
             st.session_state.entries.append(entry)
             st.success("Entry added successfully!")
 
-# --- Display Entries ---
 if st.session_state.entries:
     df = pd.DataFrame(st.session_state.entries)
     st.subheader("📋 All Entries")
