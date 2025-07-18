@@ -1,30 +1,15 @@
 import streamlit as st
 import pandas as pd
-import os
 
-# File to store data
-excel_file = "mental_wellness_basic.xlsx"
-
-# Load entries from Excel
-@st.cache_data
-def load_data():
-    if os.path.exists(excel_file):
-        return pd.read_excel(excel_file)
-    else:
-        return pd.DataFrame(columns=["Name", "Gender", "Activity", "Me-Time", "Screen-Free Time", "Status"])
-
-# Save entries to Excel
-def save_data(df):
-    df.to_excel(excel_file, index=False)
+# Initialize session state to hold entries
+if "entries" not in st.session_state:
+    st.session_state.entries = []
 
 # Determine health status
 def get_status(minutes):
     return "Healthy" if int(minutes) >= 60 else "Needs More Me-Time"
 
-# Load data
-df = load_data()
-
-st.title("🧠 Mental Wellness Logger (Basic)")
+st.title("🧠 Mental Wellness Logger (No Excel)")
 
 # --- Input Form ---
 with st.form("entry_form", clear_on_submit=True):
@@ -43,12 +28,21 @@ with st.form("entry_form", clear_on_submit=True):
             st.error("Screen-Free Time must be a positive number.")
         else:
             status = get_status(screen_time)
-            new_entry = pd.DataFrame([[name, gender, activity, me_time, int(screen_time), status]],
-                                     columns=df.columns)
-            df = pd.concat([df, new_entry], ignore_index=True)
-            save_data(df)
+            entry = {
+                "Name": name,
+                "Gender": gender,
+                "Activity": activity,
+                "Me-Time": me_time,
+                "Screen-Free Time": int(screen_time),
+                "Status": status
+            }
+            st.session_state.entries.append(entry)
             st.success("Entry added successfully!")
 
 # --- Display Entries ---
-st.subheader("📋 All Entries")
-st.dataframe(df, use_container_width=True)
+if st.session_state.entries:
+    df = pd.DataFrame(st.session_state.entries)
+    st.subheader("📋 All Entries")
+    st.dataframe(df, use_container_width=True)
+else:
+    st.info("No entries yet.")
